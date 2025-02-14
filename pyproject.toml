@@ -1,0 +1,62 @@
+[project]
+name = "stori-rag-challenge"
+version = "0.1.0"
+description = "Stori RAG Challenge"
+authors = [
+    {name = "Agustin Torres",email = "agustintorres2001@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.10, <4.0"
+dependencies = [
+    "black (>=25.1.0,<26.0.0)",
+    "isort (>=6.0.0,<7.0.0)",
+    "python-dotenv (>=1.0.1,<2.0.0)",
+    "pre-commit (>=4.1.0,<5.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.black]
+# Configure line length
+line-length = 79
+
+# Indicate the target Python versions (e.g., 3.10, 3.12, etc.)
+target-version = ["py310", "py312"]
+
+# (Optional) To avoid modifying the quotes in strings
+skip-string-normalization = false
+
+# To avoid adding the 'magic comma' at the end of tuples/lists
+skip-magic-trailing-comma = false
+
+# Silent mode (shows errors and minimal warnings)
+quiet = false
+
+# Verbose mode (shows more details of what it does)
+verbose = false
+
+# Include and exclude paths using regex
+# Adjust this example to the paths of your project
+include = '\.pyi?$'
+exclude = '''
+/(
+  \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+[tool.isort]
+profile = "black"  # to be 100% compatible with Black
+line_length = 79
+multi_line_output = 3
+include_trailing_comma = true
