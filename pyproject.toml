@@ -11,7 +11,15 @@ dependencies = [
     "black (>=25.1.0,<26.0.0)",
     "isort (>=6.0.0,<7.0.0)",
     "python-dotenv (>=1.0.1,<2.0.0)",
-    "pre-commit (>=4.1.0,<5.0.0)"
+    "pre-commit (>=4.1.0,<5.0.0)",
+    "fastapi (>=0.115.8,<0.116.0)",
+    "uvicorn (>=0.34.0,<0.35.0)",
+    "scikit-learn (>=1.6.1,<2.0.0)",
+    "langchain-community (>=0.3.17,<0.4.0)",
+    "asgi-correlation-id (>=4.3.4,<5.0.0)",
+    "python-multipart (>=0.0.20,<0.0.21)",
+    "pypdf (>=5.3.0,<6.0.0)",
+    "starlette (>=0.45.3,<0.46.0)"
 ]
 
 
