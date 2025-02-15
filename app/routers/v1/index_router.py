@@ -1,7 +1,15 @@
 # app/routers/v1/index_router.py
 from typing import List
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile
+from fastapi import (
+    APIRouter,
+    File,
+    Form,
+    HTTPException,
+    Path,
+    Query,
+    UploadFile,
+)
 from starlette import status
 
 from app.services import IndexService, PDFLoaderService
@@ -9,7 +17,7 @@ from app.utils.logger import logger
 
 router = APIRouter(
     prefix="/index",
-    tags=["Index"],
+    tags=["Index - TF-IDF"],
 )
 
 
@@ -22,17 +30,18 @@ async def index_documents(
     index_name: str = Form(...),
     files: List[UploadFile] = File(...),
 ):
-    """Create a new document index.
+    """
+    Create a new document index from uploaded PDF files.
 
     Args:
-        index_name (str): Name of the index to create.
+        index_name (str): The name for the new index.
         files (List[UploadFile]): List of PDF files to process and index.
 
     Returns:
-        dict: Status message with index creation result.
+        dict: A status message including the index name.
 
     Raises:
-        HTTPException: If there's an error processing files or creating the index.
+        HTTPException: If an error occurs while processing files or creating the index.
     """
     try:
         pdf_loader_service = PDFLoaderService(files)
@@ -63,22 +72,23 @@ async def index_documents(
     status_code=status.HTTP_200_OK,
 )
 async def search_index(
-    index_name: str,
-    query: str,
-    k: int = 10,
+    index_name: str = Path(..., description="Index name"),
+    query: str = Query(..., description="Search query"),
+    k: int = Query(10, description="Number of results to return"),
 ):
-    """Search for documents in an existing index.
+    """
+    Search for documents in an existing index.
 
     Args:
-        index_name (str): Name of the index to search in.
-        query (str): Search query string.
-        k (int, optional): Number of results to return. Defaults to 10.
+        index_name (str): The index name to search in.
+        query (str): The search query string.
+        k (int, optional): The number of results to return. Defaults to 10.
 
     Returns:
-        List[Document]: List of relevant documents matching the query.
+        List[Document]: Relevant documents matching the query.
 
     Raises:
-        HTTPException: If the index is not found or if there's an error during search.
+        HTTPException: If the index is not found or an error occurs during search.
     """
     try:
         index_service = IndexService()
@@ -98,16 +108,17 @@ async def search_index(
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def delete_index(index_name: str):
-    """Delete an existing index.
+    """
+    Delete an existing index.
 
     Args:
-        index_name (str): Name of the index to delete.
+        index_name (str): The name of the index to delete.
 
     Returns:
-        dict: Status message confirming index deletion.
+        dict: Confirmation of index deletion.
 
     Raises:
-        HTTPException: If the index is not found or if there's an error during deletion.
+        HTTPException: If the index is not found or deletion fails.
     """
     try:
         index_service = IndexService()

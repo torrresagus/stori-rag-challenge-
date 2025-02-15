@@ -1,17 +1,24 @@
-from typing import Dict, Optional
+# app/routers/v1/retrieval_router.py
+from typing import Dict
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Path, Query
 
-from app.services.retrieval_service import RetrievalService
+from app.services import RetrievalService
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/retrieve",
+    tags=["Retrieval - LLM"],
+)
 
 
-@router.get("/retrieve")
-async def retrieve_information(
-    index_name: str, query: str, k: Optional[int] = 5
+@router.get("/tfidf/{index_name}")
+async def retrieve_information_tfidf(
+    index_name: str = Path(..., description="Index name"),
+    query: str = Query(..., description="Search query"),
+    k: int = Query(5, description="Number of results to return"),
 ) -> Dict[str, str]:
-    """Retrieve information based on a query from a specific index.
+    """
+    Retrieve information based on a query from a specific index.
 
     Args:
         index_name (str): Name of the index to search
@@ -26,7 +33,32 @@ async def retrieve_information(
     """
     try:
         return RetrievalService(index_name=index_name).retrieve_information(
-            query, k
+            query, "tfidf", k
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/retrieve/vector/{collection}")
+async def retrieve_information_vector(
+    collection: str = Path(..., description="Collection (namespace) name"),
+    query: str = Query(..., description="Search query"),
+    k: int = Query(5, description="Number of results to return"),
+) -> Dict[str, str]:
+    """
+    Retrieve information based on a query from a vector store collection.
+
+    Args:
+        collection (str): The name of the vector store collection.
+        query (str): The search query.
+        k (int, optional): The number of documents to retrieve. Defaults to 5.
+
+    Returns:
+        Dict[str, str]: The response containing the retrieved information.
+
+    Raises:
+        HTTPException: If retrieval fails.
+    """
+    return RetrievalService(collection=collection).retrieve_information(
+        query, "vector", k
+    )

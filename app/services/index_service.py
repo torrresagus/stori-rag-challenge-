@@ -12,41 +12,40 @@ from starlette import status
 class IndexService:
     """Service for managing TF-IDF based document retrieval.
 
-    This service provides functionality to create, save, load, and search through documents
-    using TF-IDF (Term Frequency-Inverse Document Frequency) retrieval method.
+    This service provides functionality to create, save, load, and search through a TF-IDF index.
     """
 
     def __init__(self, documents: List[Document] = None):
-        """Initialize the index service.
+        """Initialize the TF-IDF index service.
 
         Args:
-            documents (List[Document], optional): List of documents to initialize the retriever. Defaults to None.
+            documents (List[Document], optional): Documents used to initialize the index. Defaults to None.
         """
         self.retriever = None
         if documents:
             self.retriever = TFIDFRetriever.from_documents(documents)
 
     def index_documents(self, documents: List[Document]) -> None:
-        """Create a new index from a list of documents.
+        """Create a TF-IDF index from the provided documents.
 
         Args:
-            documents (List[Document]): List of documents to index.
+            documents (List[Document]): Documents to index.
         """
         self.retriever = TFIDFRetriever.from_documents(documents)
 
     def save_index(self, name: str) -> None:
-        """Save the current retriever to a local file.
+        """Save the current TF-IDF index to a local file.
 
         Args:
-            name (str): Name of the index file.
+            name (str): The base name of the index file.
 
         Raises:
-            HTTPException: If no retriever has been initialized or if there's an error saving the index.
+            HTTPException: If no index has been created or if an error occurs while saving.
         """
         if not self.retriever:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="No index has been created yet",
+                detail="No index has been created yet.",
             )
         try:
             self.retriever.save_local(f"./app/indexes/{name}.pkl")
@@ -57,10 +56,10 @@ class IndexService:
             )
 
     def load_index(self, name: str) -> None:
-        """Load a previously saved retriever from a local file.
+        """Load an existing TF-IDF index from a local file.
 
         Args:
-            name (str): Name of the index file to load.
+            name (str): The base name of the index file to load.
 
         Raises:
             HTTPException: If the index file is not found.
@@ -77,22 +76,22 @@ class IndexService:
             )
 
     def search(self, query: str, k: int = 10) -> List[Document]:
-        """Search for relevant documents using the query.
+        """Search for relevant documents using the TF-IDF index.
 
         Args:
-            query (str): The search query string.
-            k (int, optional): Number of results to return. Defaults to 10.
+            query (str): The search query.
+            k (int, optional): The number of results to return. Defaults to 10.
 
         Returns:
-            List[Document]: List of relevant documents matching the query.
+            List[Document]: Documents matching the query.
 
         Raises:
-            HTTPException: If no index exists or if the search operation fails.
+            HTTPException: If no index exists or if an error occurs during the search.
         """
         if not self.retriever:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="No index has been created yet",
+                detail="No index has been created yet.",
             )
         try:
             self.retriever.k = k
@@ -104,13 +103,13 @@ class IndexService:
             )
 
     def remove_index(self, name: str) -> None:
-        """Remove a previously saved retriever file.
+        """Remove a saved TF-IDF index file.
 
         Args:
-            name (str): Name of the index file to remove.
+            name (str): The base name of the index file to remove.
 
         Raises:
-            HTTPException: If the index is not found or if there's an error during removal.
+            HTTPException: If the index file is not found or removal fails.
         """
         try:
             index_path = f"./app/indexes/{name}.pkl"

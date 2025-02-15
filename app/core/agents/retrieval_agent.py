@@ -1,3 +1,4 @@
+# app/core/agents/retrieval_agent.py
 from typing import Dict, List
 
 from langchain.prompts import ChatPromptTemplate
@@ -9,10 +10,10 @@ from app.utils.logger import logger
 
 
 class RetrievalAgent(BaseAgent):
-    """Agent for handling document retrieval and query responses.
+    """
+    Agent for handling document retrieval and generating query responses.
 
-    This agent processes queries against provided documents and generates
-    contextual responses with source attribution.
+    This agent uses provided documents to generate a contextual answer and includes source attribution.
     """
 
     def __init__(self, correlation_id: str = ""):
@@ -25,8 +26,8 @@ class RetrievalAgent(BaseAgent):
             [
                 (
                     "system",
-                    "You are a retrieval agent that will generate a response to a query based on the documents provided. "
-                    "You must retrieve the source of the information from the documents provided and cite it in your response.",
+                    "You are a retrieval agent that generates responses to queries based on the provided documents. "
+                    "Extract the source information from the documents and cite it in your response.",
                 ),
                 ("assistant", "Documents: {documents}"),
                 ("user", "Query: {query}"),
@@ -38,17 +39,18 @@ class RetrievalAgent(BaseAgent):
         query: str,
         documents: List[Document],
     ) -> Dict[str, str]:
-        """Generate a response to a query based on the provided documents.
+        """
+        Generate a response based on the query and provided documents.
 
         Args:
-            query (str): The user's query
-            documents (List[Document]): List of relevant documents
+            query (str): The user's query.
+            documents (List[Document]): Relevant documents for the query.
 
         Returns:
-            Dict[str, str]: Response containing the AI's answer
+            Dict[str, str]: A response containing the AI's answer under the key 'ai_response'.
 
         Raises:
-            Exception: If an error occurs during response generation
+            Exception: If response generation fails.
         """
         try:
             documents_str = self._format_documents(documents)
@@ -62,21 +64,22 @@ class RetrievalAgent(BaseAgent):
             )
 
             if hasattr(response, "content"):
-                return {"ia_response": response.content}
+                return {"ai_response": response.content}
             else:
-                return {"ia_response": response}
+                return {"ai_response": response}
         except Exception as e:
             logger.error("Error generating response: %s", e)
             raise Exception(f"Failed to generate response: {str(e)}") from e
 
     def _format_documents(self, documents: List[Document]) -> str:
-        """Format documents for prompt input.
+        """
+        Format the documents for prompt input.
 
         Args:
-            documents (List[Document]): Documents to format
+            documents (List[Document]): Documents to format.
 
         Returns:
-            str: Formatted document string
+            str: A single formatted string containing all documents.
         """
         return "\n".join(
             [

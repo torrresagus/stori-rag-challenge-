@@ -13,9 +13,9 @@ ENVIRONMENT = os.getenv("ENVIRONMENT")
 
 
 class LogConfig(BaseModel):
-    """Logging configuration for the server with correlation ID."""
+    """Logging configuration for the Stori RAG Challenge API using correlation IDs."""
 
-    LOGGER_NAME: str = "TalentConnectionApi"
+    LOGGER_NAME: str = "StoriRAGChallenge"
     LOG_FORMAT: str = (
         "%(levelprefix)s [%(correlation_id)s] | %(asctime)s | %(message)s"
     )
@@ -58,4 +58,4 @@ class LogConfig(BaseModel):
 
 # Apply the configuration with dictConfig
 dictConfig(LogConfig().model_dump())
-logger = logging.getLogger("TalentConnectionApi")
+logger = logging.getLogger("StoriRAGChallenge")

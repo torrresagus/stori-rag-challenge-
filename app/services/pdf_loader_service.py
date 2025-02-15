@@ -14,16 +14,17 @@ from app.utils.logger import logger
 
 class PDFLoaderService:
     def __init__(self, files: List[UploadFile]):
-        """Initialize PDF loader service.
+        """
+        Initialize the PDF loader service.
 
         Args:
-            files (List[UploadFile]): List of PDF files to process.
+            files (List[UploadFile]): A list of PDF files to process.
 
         Raises:
             HTTPException: If no files are provided or if any file is not a PDF.
         """
         self.files = files
-        self.paths = []
+        self.temp_paths = []
         self.docs = []
         self.text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000, chunk_overlap=200
@@ -36,7 +37,7 @@ class PDFLoaderService:
             )
 
         for file in self.files:
-            if not file.content_type == "application/pdf":
+            if file.content_type != "application/pdf":
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail=f"File {file.filename} is not a PDF. Only PDF files are allowed.",
@@ -45,22 +46,23 @@ class PDFLoaderService:
         self._create_temp_files()
 
     def _create_temp_files(self):
-        """Create temporary files from uploaded files.
+        """
+        Create temporary files from the uploaded files.
 
         Raises:
-            HTTPException: If there's an error processing the uploaded files.
+            HTTPException: If there is an error processing the uploaded files.
         """
         try:
             for file in self.files:
                 temp_file = tempfile.NamedTemporaryFile(
                     delete=False,
                     suffix=".pdf",
-                    prefix=file.filename + "_temp_",
+                    prefix=f"{file.filename}_temp_",
                 )
                 content = file.file.read()
                 temp_file.write(content)
                 temp_file.close()
-                self.paths.append(temp_file.name)
+                self.temp_paths.append(temp_file.name)
         except Exception as e:
             self.delete_temp_files()  # Clean up any created files
             raise HTTPException(
@@ -69,17 +71,18 @@ class PDFLoaderService:
             )
 
     def load_pdfs(self) -> List[Document]:
-        """Load and process PDF documents.
+        """
+        Load and process PDF documents.
 
         Returns:
-            List[Document]: List of processed documents split into chunks.
+            List[Document]: A list of processed documents split into chunks.
 
         Raises:
-            HTTPException: If there's an error loading or processing the PDF documents.
+            HTTPException: If there is an error loading or processing the PDF documents.
         """
         try:
             all_docs = []
-            for path in self.paths:
+            for path in self.temp_paths:
                 loader = PyPDFLoader(path)
                 docs = loader.load()
                 for doc in docs:
@@ -100,7 +103,8 @@ class PDFLoaderService:
             )
 
     def delete_temp_files(self):
-        for path in self.paths:
+        """Delete all temporary files created during PDF processing."""
+        for path in self.temp_paths:
             try:
                 os.remove(path)
             except Exception as e:

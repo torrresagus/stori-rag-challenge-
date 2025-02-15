@@ -1,3 +1,4 @@
+# app/core/agents/base_agent.py
 import os
 
 from dotenv import load_dotenv
@@ -12,15 +13,16 @@ load_dotenv(override=True)
 
 
 class BaseAgent:
-    """Base agent class for handling LLM interactions.
+    """
+    Base agent class for managing LLM interactions.
 
     Attributes:
-        correlation_id (str): Unique identifier for tracking requests
-        model_openai (OpenAIModels): OpenAI model to use
-        temperature_openai (float): Temperature parameter for model responses
-        run_name (str): Name identifier for the run
-        langfuse_handler (CallbackHandler): Handler for Langfuse logging
-        llm (ChatOpenAI): OpenAI chat model instance
+        correlation_id (str): A unique identifier for the request.
+        model_openai (OpenAIModels): The OpenAI model to use.
+        temperature_openai (float): Temperature parameter for model responses.
+        run_name (str): A label for the running process.
+        langfuse_handler (CallbackHandler): Handler for Langfuse logging.
+        llm (ChatOpenAI): The OpenAI chat model instance.
     """
 
     def __init__(
@@ -56,19 +58,20 @@ class BaseAgent:
         tags: list[str] = None,
         metadata: dict = None,
     ) -> str:
-        """Execute the LLM chain with the given prompt and input data.
+        """
+        Execute the LLM chain with a given prompt and input data.
 
         Args:
-            prompt (ChatPromptTemplate): Template for the chat prompt
-            input_data (dict): Input data for the prompt
-            tags (list[str], optional): Tags for tracking. Defaults to None.
-            metadata (dict, optional): Additional metadata. Defaults to None.
+            prompt (ChatPromptTemplate): The prompt template.
+            input_data (dict): The data to fill into the prompt.
+            tags (list[str], optional): Tags for logging. Defaults to None.
+            metadata (dict, optional): Additional metadata for logging. Defaults to None.
 
         Returns:
-            str: The model's response
+            str: The response from the model.
 
         Raises:
-            Exception: If an error occurs during execution
+            Exception: If an error occurs during execution.
         """
         tags = tags or []
         metadata = metadata or {}
