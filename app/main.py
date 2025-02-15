@@ -5,7 +5,7 @@ from asgi_correlation_id import CorrelationIdMiddleware
 from dotenv import load_dotenv
 from fastapi import FastAPI
 
-from app.routers.v1 import index_router, root_router
+from app.routers.v1 import index_router, retrieval_router, root_router
 from app.utils.logger import logger
 
 load_dotenv(override=True)
@@ -18,3 +18,4 @@ app.add_middleware(CorrelationIdMiddleware)
 
 app.include_router(root_router)
 app.include_router(index_router)
+app.include_router(retrieval_router)

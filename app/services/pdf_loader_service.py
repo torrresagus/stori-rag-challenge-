@@ -53,7 +53,9 @@ class PDFLoaderService:
         try:
             for file in self.files:
                 temp_file = tempfile.NamedTemporaryFile(
-                    delete=False, suffix=".pdf"
+                    delete=False,
+                    suffix=".pdf",
+                    prefix=file.filename + "_temp_",
                 )
                 content = file.file.read()
                 temp_file.write(content)
@@ -76,12 +78,19 @@ class PDFLoaderService:
             HTTPException: If there's an error loading or processing the PDF documents.
         """
         try:
-            docs = []
+            all_docs = []
             for path in self.paths:
                 loader = PyPDFLoader(path)
-                docs.extend(loader.load())
+                docs = loader.load()
+                for doc in docs:
+                    doc.metadata["file_name"] = (
+                        doc.metadata["source"]
+                        .split("/")[-1]
+                        .split("_temp_")[0]
+                    )
+                all_docs.extend(docs)
             self.delete_temp_files()
-            self.docs = self.text_splitter.split_documents(docs)
+            self.docs = self.text_splitter.split_documents(all_docs)
             return self.docs
         except Exception as e:
             self.delete_temp_files()
