@@ -5,6 +5,7 @@ from langchain_openai import OpenAIEmbeddings
 
 from app.core.agents.retrieval_agent import RetrievalAgent
 from app.services.index_service import IndexService
+from app.services.rerank_service import RerankService
 from app.services.vector_service import VectorService
 
 
@@ -16,23 +17,30 @@ class RetrievalService:
     and the retrieval agent for generating the response.
     """
 
-    def __init__(self, index_name: str = None, collection: str = None):
+    def __init__(
+        self,
+        index_name: str = None,
+        collection: str = None,
+        session_id: str = None,
+    ):
         """
         Initialize the retrieval service.
 
         Args:
             index_name (str, optional): Name of the TF-IDF index to use.
             collection (str, optional): Name of the vector store collection to use.
+            session_id (str, optional): Session ID for chat history.
         """
-        self.retrieval_agent = RetrievalAgent()
+        self.retrieval_agent = RetrievalAgent(session_id=session_id)
         self.index_service = IndexService()
         if index_name:
             self.index_service.load_index(index_name)
         if collection:
-            self.embeddings = OpenAIEmbeddings()
+            self.embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
             self.vector_service = VectorService(
                 embeddings=self.embeddings, collection_name=collection
             )
+            self.rerank_service = RerankService(self.vector_service)
 
     def retrieve_information(
         self, query: str, retrieval_type: str, k: int = 5
@@ -54,7 +62,7 @@ class RetrievalService:
         if retrieval_type == "tfidf":
             docs = self.index_service.search(query, k)
         elif retrieval_type == "vector":
-            docs = self.vector_service.search(query, k)
+            docs = self.rerank_service.search_with_rerank(query, k)
         else:
             raise Exception(f"Unsupported retrieval type: {retrieval_type}")
         return self.retrieval_agent.generate_response(query, docs)

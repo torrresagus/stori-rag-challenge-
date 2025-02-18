@@ -16,6 +16,7 @@ async def retrieve_information_tfidf(
     index_name: str = Path(..., description="Index name"),
     query: str = Query(..., description="Search query"),
     k: int = Query(5, description="Number of results to return"),
+    session_id: str = Query(..., description="Session ID for chat history"),
 ) -> Dict[str, str]:
     """
     Retrieve information based on a query from a specific index.
@@ -32,9 +33,9 @@ async def retrieve_information_tfidf(
         HTTPException: If retrieval fails
     """
     try:
-        return RetrievalService(index_name=index_name).retrieve_information(
-            query, "tfidf", k
-        )
+        return RetrievalService(
+            index_name=index_name, session_id=session_id
+        ).retrieve_information(query, "tfidf", k)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -44,6 +45,7 @@ async def retrieve_information_vector(
     collection: str = Path(..., description="Collection (namespace) name"),
     query: str = Query(..., description="Search query"),
     k: int = Query(5, description="Number of results to return"),
+    session_id: str = Query(..., description="Session ID for chat history"),
 ) -> Dict[str, str]:
     """
     Retrieve information based on a query from a vector store collection.
@@ -59,6 +61,6 @@ async def retrieve_information_vector(
     Raises:
         HTTPException: If retrieval fails.
     """
-    return RetrievalService(collection=collection).retrieve_information(
-        query, "vector", k
-    )
+    return RetrievalService(
+        collection=collection, session_id=session_id
+    ).retrieve_information(query, "vector", k)

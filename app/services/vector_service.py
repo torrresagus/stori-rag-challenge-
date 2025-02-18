@@ -98,3 +98,6 @@ class VectorService:
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Error deleting documents: {e}",
             )
+
+    def as_retriever(self, search_kwargs: dict = None):
+        return self.vector_store.as_retriever(search_kwargs=search_kwargs)
