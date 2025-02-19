@@ -14,10 +14,7 @@ from sqlalchemy.orm import Session
 from starlette import status
 
 from app.db.db import get_db
-from app.schemas.session_overview import (
-    SessionOverview,
-    SessionOverviewHumanUpdate,
-)
+from app.schemas.session_overview import SessionOverviewHumanUpdate
 from app.services import SessionOverviewService
 
 router = APIRouter(
@@ -93,10 +90,7 @@ async def get_session_overviews(
         session_overviews = service.get_session_overviews(
             db, limit, cursor, session_id
         )
-        session_overviews_data = [
-            SessionOverview.model_validate(so) for so in session_overviews
-        ]
-        return {"status": "success", "data": session_overviews_data}
+        return {"status": "success", "data": session_overviews}
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e)
