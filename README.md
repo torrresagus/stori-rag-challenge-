@@ -38,6 +38,53 @@ Additionally, it provides detailed tracking of all chats and LLM calls.
 - **Username**: `agustintorres2001@outlook.com.ar`
 - **Password**: `StoriAdmin_`
 
+# Automated Evaluation with Ground Truth
+
+This module uses a **fact-testing** approach to automatically generate evaluation metrics (faithfulness, relevance, and correctness) by comparing the conversation against a **ground truth** dataset.
+
+## How It Works
+
+1. **Conversation & Ground Truth Retrieval**  
+   - The system retrieves relevant ground-truth documents (questions and answers) from a vector database for each human message in the conversation.
+   - By aligning the conversation content with these retrieved documents, the system determines how closely the conversation statements match the known facts (ground truth).
+
+2. **Automated Analysis Agent**  
+   - A specialized agent (**SessionAnalysisAgent**) processes the conversation and the retrieved ground truth.
+   - It outputs structured metrics indicating how well the conversation aligns with verified facts.
+
+3. **Metrics Computation**  
+   The automated evaluation method provides three main metrics:
+
+## Faithfulness
+Measures how factually consistent the conversation is with the ground truth.
+
+$$
+\text{Faithfulness} 
+= \frac{\text{Number of factually accurate statements}}{\text{Total number of factual statements examined}}
+$$
+
+---
+
+## Relevance
+Gauges how pertinent the content of the conversation is relative to the questions asked or the context provided.
+
+$$
+\text{Relevance}
+= \frac{\text{Number of relevant statements}}{\text{Total number of statements examined}}
+$$
+
+---
+
+## Correctness
+Indicates the overall correctness of the conversation’s responses (e.g., whether given answers match the ground truth).
+
+$$
+\text{Correctness}
+= \frac{\text{Number of correct answers}}{\text{Total number of answers examined}}
+$$
+
+Each of these metrics is computed by counting how many times the agent identifies a statement or response as **positive** (correct, relevant, or faithful) relative to the **total** statements or answers in the session. The higher each score, the better the conversation quality with respect to factual alignment, topical alignment, and accuracy.
+
 ---
 # Installation and Execution Guide
 
