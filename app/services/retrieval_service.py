@@ -1,8 +1,7 @@
 # app/services/retrieval_service.py
 from typing import Dict
 
-from langchain_openai import OpenAIEmbeddings
-
+from app.constants.openai_models import EmbeddingOpenAIModels
 from app.core.agents.retrieval_agent import RetrievalAgent
 from app.services.index_service import IndexService
 from app.services.vector_service import VectorService
@@ -29,9 +28,9 @@ class RetrievalService:
         if index_name:
             self.index_service.load_index(index_name)
         if collection:
-            self.embeddings = OpenAIEmbeddings()
             self.vector_service = VectorService(
-                embeddings=self.embeddings, collection_name=collection
+                embedding_model=EmbeddingOpenAIModels.TEXT_EMBEDDING_3_LARGE,
+                collection_name=collection,
             )
 
     def retrieve_information(
