@@ -3,6 +3,7 @@ from typing import Dict
 
 from langchain_openai import OpenAIEmbeddings
 
+from app.constants.openai_models import EmbeddingOpenAIModels
 from app.core.agents.retrieval_agent import RetrievalAgent
 from app.services.index_service import IndexService
 from app.services.rerank_service import RerankService
@@ -36,9 +37,9 @@ class RetrievalService:
         if index_name:
             self.index_service.load_index(index_name)
         if collection:
-            self.embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
             self.vector_service = VectorService(
-                embeddings=self.embeddings, collection_name=collection
+                collection_name=collection,
+                embedding_model=EmbeddingOpenAIModels.TEXT_EMBEDDING_3_LARGE,
             )
             self.rerank_service = RerankService(self.vector_service)
 

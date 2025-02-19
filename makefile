@@ -15,3 +15,12 @@ docker_run:
 
 poetry_path:
 	poetry env info --path
+
+create_migrations:
+	poetry run alembic revision --autogenerate -m "$(name)"
+
+migrate:
+	poetry run alembic upgrade head
+
+downgrade:
+	poetry run alembic downgrade

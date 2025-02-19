@@ -1,20 +1,24 @@
 # app/main.py
+import logging
 import os
 
 from asgi_correlation_id import CorrelationIdMiddleware
 from dotenv import load_dotenv
 from fastapi import FastAPI
 
-from app.routers import get_swagger_router
+from app.routers import chat_html_router, get_swagger_router
 from app.routers.v1 import (
     index_router,
     retrieval_router,
     root_router,
+    session_overview_router,
     vector_router,
 )
 from app.utils.logger import logger
 
 load_dotenv(override=True)
+
+logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 
 if os.getenv("ENVIRONMENT") == "local":
     logger.warning("Running in local mode, swagger has no auth")
@@ -31,6 +35,7 @@ app = FastAPI(
         None if os.getenv("ENVIRONMENT") != "local" else "/openapi.json"
     ),
 )
+
 app.add_middleware(CorrelationIdMiddleware)
 
 app.include_router(get_swagger_router(app))
@@ -38,3 +43,5 @@ app.include_router(root_router)
 app.include_router(index_router)
 app.include_router(vector_router)
 app.include_router(retrieval_router)
+app.include_router(session_overview_router)
+app.include_router(chat_html_router)

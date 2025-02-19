@@ -9,10 +9,10 @@ from fastapi import (
     Query,
     UploadFile,
 )
-from langchain_openai import OpenAIEmbeddings
 from pydantic import BaseModel
 from starlette import status
 
+from app.constants.openai_models import EmbeddingOpenAIModels
 from app.services import PDFLoaderService, VectorService
 
 router = APIRouter(
@@ -51,10 +51,9 @@ async def index_documents_vector(
         pdf_loader_service = PDFLoaderService(files)
         docs = pdf_loader_service.load_pdfs()
 
-        # Instantiate embeddings (adjust the model as needed)
-        embeddings = OpenAIEmbeddings(model="text-embedding-ada-002")
         vector_service = VectorService(
-            embeddings=embeddings, collection_name=collection_name
+            collection_name=collection_name,
+            embedding_model=EmbeddingOpenAIModels.TEXT_EMBEDDING_3_LARGE,
         )
         vector_service.index_documents(docs)
 
@@ -94,9 +93,9 @@ async def search_vector(
         HTTPException: If an error occurs during the search.
     """
     try:
-        embeddings = OpenAIEmbeddings(model="text-embedding-ada-002")
         vector_service = VectorService(
-            embeddings=embeddings, collection_name=collection
+            collection_name=collection,
+            embedding_model=EmbeddingOpenAIModels.TEXT_EMBEDDING_3_LARGE,
         )
         documents = vector_service.search(query, k)
         results = [
@@ -135,9 +134,9 @@ async def search_vector_with_score(
         HTTPException: If an error occurs during the search.
     """
     try:
-        embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
         vector_service = VectorService(
-            embeddings=embeddings, collection_name=collection
+            collection_name=collection,
+            embedding_model=EmbeddingOpenAIModels.TEXT_EMBEDDING_3_LARGE,
         )
         return vector_service.search_with_score(query, k)
     except Exception as e:
@@ -171,9 +170,9 @@ async def delete_documents_vector(
             detail="Document IDs are required",
         )
     try:
-        embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
         vector_service = VectorService(
-            embeddings=embeddings, collection_name=collection
+            collection_name=collection,
+            embedding_model=EmbeddingOpenAIModels.TEXT_EMBEDDING_3_LARGE,
         )
         vector_service.delete_documents(deletion_request.ids)
     except Exception as e:

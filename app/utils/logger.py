@@ -16,9 +16,7 @@ class LogConfig(BaseModel):
     """Logging configuration for the Stori RAG Challenge API using correlation IDs."""
 
     LOGGER_NAME: str = "StoriRAGChallenge"
-    LOG_FORMAT: str = (
-        "%(levelprefix)s [%(correlation_id)s] | %(asctime)s | %(message)s"
-    )
+    LOG_FORMAT: str = "%(levelname)s [%(correlation_id)s] | %(asctime)s | %(message)s"  # fmt: skip
     LOG_LEVEL: str = LOGGING_LEVEL
 
     version: int = 1
@@ -32,10 +30,10 @@ class LogConfig(BaseModel):
         }
     }
 
-    # Log formatters
+    # Log formatters using the standard logging.Formatter
     formatters: dict = {
         "default": {
-            "()": "uvicorn.logging.DefaultFormatter",
+            "format": "%(levelname)s [%(correlation_id)s] | %(asctime)s | %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S",
         },
     }

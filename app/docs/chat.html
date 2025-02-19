@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chat App - Stori IA</title>
+  <style>
+    /* Reset básico */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f5fb;
+      margin: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      background: #fff;
+      border-radius: 2px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    /* Header de la página */
+    .page-title {
+      padding: 15px;
+      border-bottom: 1px solid #e6ecf3;
+      background: #fff;
+    }
+    .page-title .title {
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    /* Contenedor principal */
+    .content-wrapper {
+      display: flex;
+      height: 80vh;
+    }
+    .row.no-gutters {
+      display: flex;
+      flex: 1;
+    }
+    /* Panel izquierdo: Lista de sesiones */
+    .users-container {
+      width: 30%;
+      border-right: 1px solid #e6ecf3;
+      display: flex;
+      flex-direction: column;
+    }
+    /* Lista de sesiones (sin foto) */
+    .users {
+      list-style: none;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .users .chat-session {
+      padding: 10px 15px;
+      border-bottom: 1px solid #f0f4f8;
+      cursor: pointer;
+    }
+    .users .chat-session:hover {
+      background: linear-gradient(to right, #e9eff5, #ffffff);
+    }
+    .users .chat-session.active-session {
+      background: linear-gradient(to right, #f7f9fb, #ffffff);
+    }
+    .users .chat-session:last-child {
+      border-bottom: none;
+    }
+    .chat-session span.session-label {
+      font-weight: 600;
+      color: #333;
+    }
+    .chat-session span.session-time {
+      font-size: 0.8rem;
+      color: #8796af;
+      float: right;
+    }
+    /* Botones */
+    button {
+      padding: 8px 16px;
+      background: #0d6efd;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    #newSessionBtn {
+      margin: 10px;
+    }
+    #analyzeSessionBtn {
+      margin-left: 10px;
+      font-size: 0.9rem;
+    }
+    /* Panel derecho: Conversación */
+    .chat-container {
+      width: 70%;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .selected-user {
+      padding: 15px;
+      border-bottom: 1px solid #e6ecf3;
+      background: #fff;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .chat-box {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background: #f9f9f9;
+    }
+    .chat-box li {
+      display: flex;
+      margin-bottom: 20px;
+    }
+    /* Mensaje recibido de Stori IA */
+    .chat-box li.chat-left {
+      justify-content: flex-start;
+    }
+    /* Mensaje del usuario */
+    .chat-box li.chat-right {
+      justify-content: flex-end;
+    }
+    .chat-avatar {
+      width: 48px;
+      height: 48px;
+      background: #ddd;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #555;
+      margin-right: 15px;
+      flex-shrink: 0;
+    }
+    .chat-box li.chat-right .chat-avatar {
+      margin-right: 0;
+      margin-left: 15px;
+    }
+    .chat-text {
+      max-width: 60%;
+      padding: 10px 15px;
+      background: #fff;
+      border-radius: 4px;
+      position: relative;
+      word-wrap: break-word;
+    }
+    .chat-hour {
+      font-size: 0.75rem;
+      color: #999;
+      margin-top: 5px;
+      text-align: right;
+    }
+    /* Formulario de envío de mensaje */
+    .chat-form {
+      padding: 15px;
+      background: #fff;
+      border-top: 1px solid #e6ecf3;
+    }
+    .chat-form textarea {
+      width: 100%;
+      resize: none;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 3px;
+      font-size: 0.9rem;
+    }
+    .chat-form button {
+      margin-top: 10px;
+    }
+    /* Scrollbar personalizado (opcional) */
+    .chat-box::-webkit-scrollbar {
+      width: 6px;
+    }
+    .chat-box::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 3px;
+    }
+    /* Animación de los tres puntitos */
+    .loading-dots {
+      display: inline-block;
+    }
+    .loading-dots span {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background-color: #0d6efd;
+      border-radius: 50%;
+      margin: 0 2px;
+      animation: blink 1.4s infinite both;
+    }
+    .loading-dots span:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    .loading-dots span:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+    @keyframes blink {
+      0% { opacity: 0.2; }
+      20% { opacity: 1; }
+      100% { opacity: 0.2; }
+    }
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 500px;
+      border-radius: 4px;
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    /* Estilos para la lista del análisis */
+    #analysisDetails ul {
+      list-style: none;
+      padding: 0;
+    }
+    #analysisDetails li {
+      margin-bottom: 8px;
+      border-bottom: 1px solid #e6ecf3;
+      padding-bottom: 4px;
+    }
+  </style>
+  <!-- Se incluye la biblioteca marked para convertir Markdown a HTML -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <!-- Encabezado -->
+    <div class="page-title">
+      <span class="title">Chat App - Stori IA</span>
+    </div>
+    <!-- Contenido principal -->
+    <div class="content-wrapper">
+      <div class="row no-gutters">
+        <!-- Panel izquierdo: Lista de sesiones -->
+        <div class="users-container">
+          <ul class="users" id="sessionsList">
+            <!-- Se cargarán las sesiones aquí -->
+          </ul>
+          <button id="newSessionBtn">Nueva Sesión</button>
+        </div>
+        <!-- Panel derecho: Conversación -->
+        <div class="chat-container">
+          <div class="selected-user">
+            <div>
+              Con: <span class="name">Stori IA</span>
+            </div>
+            <button id="analyzeSessionBtn">Analizar Session</button>
+          </div>
+          <ul class="chat-box" id="chatBox">
+            <!-- Se cargarán los mensajes de la sesión activa -->
+          </ul>
+          <div class="chat-form">
+            <textarea id="messageInput" rows="2" placeholder="Escribe tu mensaje..."></textarea>
+            <button id="sendMessage">Enviar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para mostrar el análisis -->
+  <div id="analysisModal" class="modal">
+    <div class="modal-content">
+      <span id="closeModal" class="close">&times;</span>
+      <h3>Análisis de la Sesión</h3>
+      <div id="analysisDetails">
+        <!-- Se mostrarán los detalles del análisis -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Función para generar UUID v4
+    function generateUUID() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0,
+            v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+
+    // Variables globales
+    let sessions = [];
+    let currentSessionIndex = 0; // índice de la sesión activa
+    let sessionOverviewResult = null; // almacenará el objeto de análisis cuando esté disponible
+
+    // Función para formatear la hora (HH:MM)
+    function getFormattedTime() {
+      const now = new Date();
+      return now.getHours().toString().padStart(2, '0') + ':' +
+             now.getMinutes().toString().padStart(2, '0');
+    }
+
+    // Cargar sesiones desde localStorage o crear sesión por defecto
+    function initSessions() {
+      const saved = localStorage.getItem('chatSessions');
+      if (saved) {
+        sessions = JSON.parse(saved);
+      } else {
+        sessions = [{
+          sessionId: generateUUID(),
+          messages: []
+        }];
+        saveSessions();
+      }
+    }
+
+    // Guardar sesiones en localStorage
+    function saveSessions() {
+      localStorage.setItem('chatSessions', JSON.stringify(sessions));
+    }
+
+    // Renderizar la lista de sesiones en el panel izquierdo
+    function renderSessionsList() {
+      const sessionsList = document.getElementById('sessionsList');
+      sessionsList.innerHTML = '';
+      sessions.forEach((session, index) => {
+        const li = document.createElement('li');
+        li.className = 'chat-session' + (index === currentSessionIndex ? ' active-session' : '');
+        li.dataset.index = index;
+        li.innerHTML = `<span class="session-label">Session ID: ${session.sessionId}</span>
+                        <span class="session-time">${session.messages.length ? getFormattedTime() : ''}</span>`;
+        li.addEventListener('click', () => {
+          currentSessionIndex = index;
+          // Reiniciamos el análisis al cambiar de sesión
+          sessionOverviewResult = null;
+          document.getElementById('analyzeSessionBtn').textContent = "Analizar Session";
+          document.getElementById('analyzeSessionBtn').disabled = false;
+          renderSessionsList();
+          renderChatBox();
+        });
+        sessionsList.appendChild(li);
+      });
+    }
+
+    // Renderizar los mensajes en el chatBox según la sesión activa
+    function renderChatBox() {
+      const chatBox = document.getElementById('chatBox');
+      chatBox.innerHTML = '';
+      const activeSession = sessions[currentSessionIndex];
+      activeSession.messages.forEach(msg => {
+        const li = document.createElement('li');
+        li.className = msg.sender === 'user' ? 'chat-right' : 'chat-left';
+        if (msg.sender === 'server') {
+          let messageContent = '';
+          if (msg.isLoading) {
+            // Mostrar animación de carga
+            messageContent = `<span class="loading-dots"><span></span><span></span><span></span></span>`;
+          } else {
+            // Convertir Markdown a HTML usando marked
+            messageContent = marked.parse(msg.text);
+          }
+          li.innerHTML = `
+            <div class="chat-avatar">S</div>
+            <div class="chat-text">${messageContent}</div>
+            <div class="chat-hour">${msg.time}</div>
+          `;
+        } else {
+          li.innerHTML = `
+            <div class="chat-text">${msg.text}</div>
+            <div class="chat-hour">${msg.time}</div>
+          `;
+        }
+        chatBox.appendChild(li);
+      });
+      // Auto-scroll al fondo
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // Agregar mensaje a la sesión activa y actualizar la vista y storage
+    function addMessageToCurrentSession(sender, text) {
+      const time = getFormattedTime();
+      const message = { sender, text, time };
+      sessions[currentSessionIndex].messages.push(message);
+      saveSessions();
+      renderChatBox();
+    }
+
+    // Crear una nueva sesión y activarla
+    function createNewSession() {
+      const newSession = {
+        sessionId: generateUUID(),
+        messages: []
+      };
+      sessions.push(newSession);
+      currentSessionIndex = sessions.length - 1;
+      // Reiniciamos el análisis al crear nueva sesión
+      sessionOverviewResult = null;
+      document.getElementById('analyzeSessionBtn').textContent = "Analizar Session";
+      document.getElementById('analyzeSessionBtn').disabled = false;
+      saveSessions();
+      renderSessionsList();
+      renderChatBox();
+    }
+
+    // Función para mostrar el modal con los detalles del análisis
+    function showAnalysisModal(analysis) {
+      const detailsContainer = document.getElementById('analysisDetails');
+      let detailsHTML = '<ul>';
+      for (let key in analysis) {
+        detailsHTML += `<li><strong>${key}:</strong> ${analysis[key]}</li>`;
+      }
+      detailsHTML += '</ul>';
+      detailsContainer.innerHTML = detailsHTML;
+      document.getElementById('analysisModal').style.display = "block";
+    }
+
+    // Cerrar el modal al hacer clic en la "X"
+    document.getElementById('closeModal').addEventListener('click', function() {
+      document.getElementById('analysisModal').style.display = "none";
+    });
+
+    // Cerrar el modal al hacer clic fuera del contenido
+    window.addEventListener('click', function(event) {
+      const modal = document.getElementById('analysisModal');
+      if (event.target === modal) {
+        modal.style.display = "none";
+      }
+    });
+
+    // Inicialización
+    initSessions();
+    renderSessionsList();
+    renderChatBox();
+
+    // Envío de mensaje
+    document.getElementById('sendMessage').addEventListener('click', function() {
+      const messageInput = document.getElementById('messageInput');
+      const messageText = messageInput.value.trim();
+      if (!messageText) return;
+      // Agregar mensaje del usuario a la sesión activa
+      addMessageToCurrentSession('user', messageText);
+      messageInput.value = '';
+
+      // Agregar mensaje de carga (animación de tres puntitos)
+      const loadingMessage = {
+        sender: 'server',
+        text: '',
+        time: getFormattedTime(),
+        isLoading: true
+      };
+      sessions[currentSessionIndex].messages.push(loadingMessage);
+      const loadingMessageIndex = sessions[currentSessionIndex].messages.length - 1;
+      saveSessions();
+      renderChatBox();
+
+      // Construir URL con query parameters:
+      // query=<mensaje>&k=3&session_id=<UUID>
+      const activeSessionId = sessions[currentSessionIndex].sessionId;
+      const endpoint = `/retrieve/retrieve/vector/StoriAnexoINFO?query=${encodeURIComponent(messageText)}&k=5&session_id=${encodeURIComponent(activeSessionId)}`;
+
+      fetch(endpoint, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Se espera que la respuesta tenga la propiedad "ai_response"
+        const replyText = data.ai_response || 'Sin respuesta';
+        // Actualizar el mensaje de carga con la respuesta de la IA
+        sessions[currentSessionIndex].messages[loadingMessageIndex].text = replyText;
+        delete sessions[currentSessionIndex].messages[loadingMessageIndex].isLoading;
+        saveSessions();
+        renderChatBox();
+        renderSessionsList();
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        sessions[currentSessionIndex].messages[loadingMessageIndex].text = 'Sin respuesta';
+        delete sessions[currentSessionIndex].messages[loadingMessageIndex].isLoading;
+        saveSessions();
+        renderChatBox();
+      });
+    });
+
+    // Botón para crear nueva sesión
+    document.getElementById('newSessionBtn').addEventListener('click', createNewSession);
+
+    // Botón para analizar la sesión actual / ver análisis si ya se realizó
+    document.getElementById('analyzeSessionBtn').addEventListener('click', function() {
+      const analyzeBtn = this;
+      // Si ya se realizó el análisis, mostrar el modal con los detalles
+      if (sessionOverviewResult) {
+        showAnalysisModal(sessionOverviewResult);
+        return;
+      }
+      // Si no, enviar la solicitud de análisis
+      analyzeBtn.textContent = "Analizando...";
+      analyzeBtn.disabled = true;
+      const sessionId = sessions[currentSessionIndex].sessionId;
+      const formData = new FormData();
+      formData.append('session_id', sessionId);
+      fetch('/session_overview/', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === "success") {
+          // Guardar el análisis recibido
+          sessionOverviewResult = data.session_overview;
+          // Actualizar el botón a "Ver Analisis"
+          analyzeBtn.textContent = "Ver Analisis";
+          analyzeBtn.disabled = false;
+          alert(data.message || 'Se generó el análisis de la sesión.');
+        } else {
+          alert('Error al generar el análisis.');
+          analyzeBtn.textContent = "Analizar Session";
+          analyzeBtn.disabled = false;
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Error al generar el análisis.');
+        analyzeBtn.textContent = "Analizar Session";
+        analyzeBtn.disabled = false;
+      });
+    });
+  </script>
+</body>
+</html>

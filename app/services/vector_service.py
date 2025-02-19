@@ -3,19 +3,23 @@ from typing import List, Tuple
 
 from fastapi import HTTPException, status
 from langchain_core.documents import Document
+from langchain_openai import OpenAIEmbeddings
 from langchain_postgres.vectorstores import PGVector
+
+from app.constants.openai_models import EmbeddingOpenAIModels
 
 
 class VectorService:
     def __init__(
         self,
-        embeddings,
         collection_name: str,
+        embedding_model: EmbeddingOpenAIModels = EmbeddingOpenAIModels.TEXT_EMBEDDING_3_LARGE,
         connection: str = os.getenv("DATABASE_URL"),
     ):
         try:
+            self.embeddings = OpenAIEmbeddings(model=embedding_model)
             self.vector_store = PGVector(
-                embeddings=embeddings,
+                embeddings=self.embeddings,
                 collection_name=collection_name,
                 connection=connection,
                 use_jsonb=True,
@@ -23,7 +27,7 @@ class VectorService:
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail=f"Error at initializing the vector store: {e}",
+                detail=f"Error at initializing the vector store with embeddings model '{embedding_model}': {e}",
             )
 
     def index_documents(
@@ -101,3 +105,6 @@ class VectorService:
 
     def as_retriever(self, search_kwargs: dict = None):
         return self.vector_store.as_retriever(search_kwargs=search_kwargs)
+
+    def delete_collection(self):
+        self.vector_store.delete_collection()

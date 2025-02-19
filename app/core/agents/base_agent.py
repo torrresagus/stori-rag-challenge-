@@ -8,6 +8,7 @@ from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 from langchain_openai import ChatOpenAI
 from langchain_postgres import PostgresChatMessageHistory
 from langfuse.callback import CallbackHandler
+from pydantic import BaseModel
 
 from app.constants.openai_models import OpenAIModels
 from app.utils.logger import logger
@@ -31,6 +32,7 @@ class BaseAgent:
         model_openai: OpenAIModels = OpenAIModels.GPT_4O_MINI,
         temperature_openai: float = 0,
         chat_history: Optional[PostgresChatMessageHistory] = None,
+        structured_output: Optional[BaseModel] = None,
     ):
         self.correlation_id = correlation_id
         self.session_id = session_id
@@ -53,6 +55,9 @@ class BaseAgent:
             temperature=self.temperature_openai,
         )
 
+        if structured_output:
+            self.llm = self.llm.with_structured_output(structured_output)
+
     def _add_to_chat_history(
         self, messages: List[Union[SystemMessage, HumanMessage, AIMessage]]
     ) -> None:
@@ -71,7 +76,7 @@ class BaseAgent:
         input_data: dict,
         tags: List[str] = None,
         metadata: dict = None,
-    ) -> str:
+    ) -> any:
         """
         Executes the LLM chain without modifying the memory.
 

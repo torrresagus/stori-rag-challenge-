@@ -26,7 +26,9 @@ dependencies = [
     "psycopg[c] (>=3.2.4,<4.0.0)",
     "psycopg2-binary (>=2.9.10,<3.0.0)",
     "cohere (>=5.13.12,<6.0.0)",
-    "langchain-cohere (>=0.4.2,<0.5.0)"
+    "langchain-cohere (>=0.4.2,<0.5.0)",
+    "alembic (>=1.14.1,<2.0.0)",
+    "sqlalchemy (>=2.0.38,<3.0.0)"
 ]
 
 
