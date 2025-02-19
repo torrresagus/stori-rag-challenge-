@@ -25,6 +25,18 @@ However, DNS propagation was not yet complete as of **February 19, 2024 at 12 PM
 
 - **/chat**: Provides a very simple interface to directly chat with the “Stori Annex” and run an automated analysis to generate metrics.
 
+# Metrics and Monitoring
+
+In the production application, a **framework** has been implemented to measure costs, latencies, token usage, and more, allowing for performance and cost visualization.  
+Additionally, it provides detailed tracking of all chats and LLM calls.
+
+> **Note**: These metrics are **not** the same as those requested in the challenge; they are **additional** metrics.
+
+## Access Link
+
+- **URL**: [Traces in Langfuse](https://us.cloud.langfuse.com/project/cm7c0an7p0053ad07slee7lsk/traces)
+- **Username**: `agustintorres2001@outlook.com.ar`
+- **Password**: `StoriAdmin_`
 
 ---
 # Installation and Execution Guide
