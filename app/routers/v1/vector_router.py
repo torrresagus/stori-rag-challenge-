@@ -2,6 +2,7 @@ from typing import List
 
 from fastapi import (
     APIRouter,
+    Body,
     File,
     Form,
     HTTPException,
@@ -152,7 +153,7 @@ async def search_vector_with_score(
 )
 async def delete_documents_vector(
     collection: str = Path(..., description="Collection (namespace) name"),
-    deletion_request: DeleteDocumentsRequest = None,
+    deletion_request: DeleteDocumentsRequest = Body(...),
 ):
     """
     Delete documents from the vector store using their IDs.

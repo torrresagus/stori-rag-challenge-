@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 from langchain_cohere import CohereRerank
 
 from app.services.vector_service import VectorService
+from app.utils.logger import logger
 
 load_dotenv(override=True)
 
@@ -16,10 +17,11 @@ class RerankService:
         return documents
 
     def search_with_rerank(self, query: str, k: int):
+        logger.info("Searching with rerank")
         documents = self.get_documents(query, k)
 
         print(documents)
-        reranked_docs = self.reranker.rerank(documents, query)
+        reranked_docs = self.reranker.rerank(documents, query, top_n=3)
 
         for info in reranked_docs:
             idx = info["index"]

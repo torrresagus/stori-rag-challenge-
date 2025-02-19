@@ -44,7 +44,11 @@ class RetrievalService:
             self.rerank_service = RerankService(self.vector_service)
 
     def retrieve_information(
-        self, query: str, retrieval_type: str, k: int = 5
+        self,
+        query: str,
+        retrieval_type: str,
+        k: int = 5,
+        reranked: bool = True,
     ) -> Dict[str, str]:
         """
         Retrieve and process information based on a query.
@@ -63,7 +67,11 @@ class RetrievalService:
         if retrieval_type == "tfidf":
             docs = self.index_service.search(query, k)
         elif retrieval_type == "vector":
-            docs = self.rerank_service.search_with_rerank(query, k)
+            docs = (
+                self.rerank_service.search_with_rerank(query, k)
+                if reranked
+                else self.vector_service.search(query, k)
+            )
         else:
             raise Exception(f"Unsupported retrieval type: {retrieval_type}")
         return self.retrieval_agent.generate_response(query, docs)

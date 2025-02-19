@@ -8,6 +8,7 @@ from fastapi import FastAPI
 
 from app.routers import chat_html_router, get_swagger_router
 from app.routers.v1 import (
+    chat_history_router,
     index_router,
     retrieval_router,
     root_router,
@@ -45,3 +46,4 @@ app.include_router(vector_router)
 app.include_router(retrieval_router)
 app.include_router(session_overview_router)
 app.include_router(chat_html_router)
+app.include_router(chat_history_router)

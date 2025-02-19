@@ -1,9 +1,8 @@
 # app/services/session_overview_service.py
-from typing import Tuple  # <-- Se importa Tuple para las anotaciones de tipos
+from typing import List, Tuple
 
 from fastapi import HTTPException
 from langchain_core.documents import Document
-from langchain_openai import OpenAIEmbeddings
 from sqlalchemy.orm import Session
 from starlette import status
 
@@ -12,6 +11,7 @@ from app.core.agents.session_analysis_agent import SessionAnalysisAgent
 from app.models.session_overview import SessionOverview
 from app.schemas.session_overview import SessionOverviewHumanUpdate
 from app.services.vector_service import VectorService
+from app.utils.logger import logger
 
 
 class SessionOverviewService:
@@ -23,9 +23,10 @@ class SessionOverviewService:
             session_id (str, optional): The unique session identifier.
         """
         self.session_id = session_id
-        self.session_analysis_agent = SessionAnalysisAgent(
-            session_id=session_id
-        )
+        if session_id:
+            self.session_analysis_agent = SessionAnalysisAgent(
+                session_id=session_id
+            )
         self.vector_service = VectorService(
             collection_name="questions_dataset",
             embedding_model=EmbeddingOpenAIModels.TEXT_EMBEDDING_3_LARGE,
@@ -177,7 +178,7 @@ class SessionOverviewService:
         db.refresh(session_overview)
         return session_overview
 
-    def upload_questions_dataset(self, questions_dataset: dict):
+    def upload_questions_dataset(self, questions_dataset: List[dict]):
         """
         Upload a dataset of questions and answers to index as ground truth.
 
@@ -188,6 +189,10 @@ class SessionOverviewService:
             HTTPException: If indexing the documents fails.
         """
         try:
+            logger.info(f"Deleting collection: questions_dataset")
+            self.vector_service.delete_collection()
+            logger.info(f"Creating collection: questions_dataset")
+            self.vector_service.create_collection()
             documents = [
                 Document(
                     page_content=item["question"],

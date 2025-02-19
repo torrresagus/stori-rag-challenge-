@@ -108,3 +108,6 @@ class VectorService:
 
     def delete_collection(self):
         self.vector_store.delete_collection()
+
+    def create_collection(self):
+        self.vector_store.create_collection()

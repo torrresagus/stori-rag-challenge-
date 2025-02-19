@@ -40,12 +40,13 @@ async def retrieve_information_tfidf(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/retrieve/vector/{collection}")
+@router.get("/vector/{collection}")
 async def retrieve_information_vector(
     collection: str = Path(..., description="Collection (namespace) name"),
     query: str = Query(..., description="Search query"),
     k: int = Query(5, description="Number of results to return"),
     session_id: str = Query(..., description="Session ID for chat history"),
+    reranked: bool = Query(True, description="Whether to rerank the results"),
 ) -> Dict[str, str]:
     """
     Retrieve information based on a query from a vector store collection.
@@ -63,4 +64,4 @@ async def retrieve_information_vector(
     """
     return RetrievalService(
         collection=collection, session_id=session_id
-    ).retrieve_information(query, "vector", k)
+    ).retrieve_information(query, "vector", k, reranked)

@@ -1,4 +1,5 @@
 # app/routers/v1/__init__.py
+from .chat_history_router import router as chat_history_router
 from .index_router import router as index_router
 from .retrieval_router import router as retrieval_router
 from .root_router import router as root_router
@@ -11,4 +12,5 @@ __all__ = [
     "root_router",
     "vector_router",
     "session_overview_router",
+    "chat_history_router",
 ]

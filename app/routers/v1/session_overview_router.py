@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import (
     APIRouter,
@@ -6,6 +6,7 @@ from fastapi import (
     Depends,
     Form,
     HTTPException,
+    Path,
     Query,
     Response,
 )
@@ -27,12 +28,12 @@ router = APIRouter(
 
 @router.post(
     "/",
-    description="Run automated evaluation of the session (creates new overview or updates existing one)",
+    description="Evaluate session; create or update overview",
 )
 async def evaluate_session(
     session_id: str = Form(...),
-    db: Session = Depends(get_db),
     response: Response = None,
+    db: Session = Depends(get_db),
 ):
     """
     Process a session evaluation request.
@@ -75,15 +76,14 @@ async def evaluate_session(
 @router.get(
     "/",
     status_code=status.HTTP_200_OK,
-    description="Get session overviews with pagination and optional filtering by session_id",
+    description="Get session overviews with pagination and optional session_id filter",
 )
 async def get_session_overviews(
     limit: int = Query(10, gt=0, description="Number of items per page"),
-    cursor: int = Query(
-        None,
-        description="Cursor (last session overview id from previous page)",
+    cursor: Optional[int] = Query(
+        None, description="Last session overview id from previous page"
     ),
-    session_id: str = Query(
+    session_id: Optional[str] = Query(
         None, description="Optional session id to filter results"
     ),
     db: Session = Depends(get_db),
@@ -109,8 +109,8 @@ async def get_session_overviews(
     description="Update human evaluation fields of a session overview",
 )
 async def update_session_overview(
-    session_id: str,
-    update_data: SessionOverviewHumanUpdate,
+    session_id: str = Path(..., description="Session ID of the overview"),
+    update_data: SessionOverviewHumanUpdate = Body(...),
     db: Session = Depends(get_db),
 ):
     try:
@@ -132,7 +132,7 @@ async def update_session_overview(
 @router.post(
     "/questions-dataset",
     status_code=status.HTTP_200_OK,
-    description="Upload a dataset of questions and their correct answers to be stored as ground truth",
+    description="Upload questions dataset for ground truth",
 )
 async def upload_questions_dataset(
     questions_dataset: List[dict] = Body(...),
