@@ -586,7 +586,7 @@
       
         const reranked = document.getElementById('rerankedCheckbox').checked ? "True" : "False";
         const activeSessionId = sessions[currentSessionIndex].sessionId;
-        const endpoint = `/retrieve/retrieve/vector/StoriAnexoINFO?query=${encodeURIComponent(messageText)}&k=5&session_id=${encodeURIComponent(activeSessionId)}&reranked=${reranked}`;
+        const endpoint = `/retrieve/vector/StoriAnexoINFO?query=${encodeURIComponent(messageText)}&k=5&session_id=${encodeURIComponent(activeSessionId)}&reranked=${reranked}`;
       
         fetch(endpoint, {
           method: 'GET',
